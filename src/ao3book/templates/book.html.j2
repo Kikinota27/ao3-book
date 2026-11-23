@@ -1,0 +1,67 @@
+{#-
+  Plantilla del libro. Solo estructura: todo el aspecto vive en styles/book.css.
+ 
+  Variables que recibe (las arma build.py):
+    works          lista de Work, ya ordenadas
+    css            CSS completo (variables :root + book.css)
+    doc_title      título del documento (metadato del PDF)
+    start_on_recto bool: cada obra empieza en página derecha
+    toc_on_recto   bool: el índice empieza en página derecha (página en blanco tras la portada si hace falta)
+    lang           (opcional) idioma del texto, por defecto "en"
+    label_toc      (opcional) texto del encabezado del índice, por defecto "Contents"
+ 
+  Se espera un Environment con autoescape=True, trim_blocks=True y lstrip_blocks=True.
+  chapter.html y work.summary_html ya vienen limpios del parser, por eso van con |safe.
+-#}
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+<meta charset="utf-8">
+<title>{{ doc_title }}</title>
+<style>
+{{ css | safe }}
+</style>
+</head>
+<body>
+{% for work in works %}
+{% set w = loop.index %}
+<section class="work{% if start_on_recto %} recto{% endif %}{% if work.is_single_chapter %} single{% endif %}" id="w{{ w }}">
+ 
+  <header class="work-front">
+    <h1 class="work-title">{{ work.title }}</h1>
+    {% if work.author %}
+    <p class="work-author">{{ work.author }}</p>
+    {% endif %}
+    {% if work.summary_html %}
+    <div class="work-summary">
+{{ work.summary_html | safe }}
+    </div>
+    {% endif %}
+    {% if work.show_toc %}
+    <nav class="toc{% if toc_on_recto %} recto{% endif %}">
+      <h2 class="toc-label">{{ label_toc | default('Contents') }}</h2>
+      <ol>
+        {% for chapter in work.chapters %}
+        <li><a href="#w{{ w }}-c{{ chapter.number }}">{{ chapter.title }}</a></li>
+        {% endfor %}
+      </ol>
+    </nav>
+    {% endif %}
+  </header>
+ 
+  {% for chapter in work.chapters %}
+  <article class="chapter" id="w{{ w }}-c{{ chapter.number }}">
+    {% if not work.is_single_chapter %}
+    <h2 class="chapter-title">{{ chapter.title }}</h2>
+    {% endif %}
+    <div class="chapter-body">
+{{ chapter.html | safe }}
+    </div>
+  </article>
+  {% endfor %}
+ 
+</section>
+{% endfor %}
+</body>
+</html>
+ 

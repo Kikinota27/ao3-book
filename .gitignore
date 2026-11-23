@@ -1,0 +1,24 @@
+# Entradas y salidas (se conservan las carpetas, no el contenido)
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Herramientas
+.pytest_cache/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Guias
+CLAUDE.md

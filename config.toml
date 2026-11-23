@@ -1,0 +1,20 @@
+# Configuración de ao3-book.
+# Las rutas son relativas a la carpeta de este archivo.
+
+[input]
+dir = "input"            # carpeta con los .html de AO3
+output_dir = "output"    # carpeta donde se guardan los PDF
+
+[book]
+format = "a5"            # a4 | a5 | letter | booklet
+combine = false           # true: un solo PDF con todas las obras; false: un PDF por obra
+start_on_recto = true    # cada obra empieza en página derecha (agrega páginas en blanco si hace falta)
+toc_on_recto = false     # el índice empieza en página derecha (agrega página en blanco tras la portada si hace falta)
+font_family = "Georgia, 'Times New Roman', serif"
+font_size = "11pt"
+line_height = 1.45
+split_long_works = false      # dividir obras largas en partes (sin cortar capítulos)
+max_pages_per_part = 600     # páginas máximas por parte (páginas del PDF, no hojas)
+
+[booklet]
+sheet = "a4"             # hoja física para el folleto: a4 | letter (la página es la mitad de la hoja)
