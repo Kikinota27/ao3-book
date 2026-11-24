@@ -1,8 +1,22 @@
+🇬🇧 [Read this in English](README.en.md)
+
 # ao3-book
  
 Convierte historias descargadas de **AO3 (Archive of Our Own)** en formato HTML en un **PDF listo para imprimir como libro**, todas con el mismo formato.
  
 Ponés los archivos `.html` en una carpeta, ejecutás un comando y obtenés el PDF.
+
+## Contenido
+
+- [Qué hace](#qué-hace)
+- [Qué necesitás instalar](#qué-necesitás-instalar)
+- [Instalación paso a paso](#instalación-paso-a-paso)
+- [Cómo usarlo](#cómo-usarlo)
+- [Cómo cambiar la configuración](#cómo-cambiar-la-configuración)
+- [Cómo imprimir](#cómo-imprimir)
+- [Si algo falla](#si-algo-falla)
+- [Qué no hace (por ahora)](#qué-no-hace-por-ahora)
+- [Para quien quiera ver el código](#para-quien-quiera-ver-el-código)
  
 ---
  
@@ -46,6 +60,19 @@ Los paquetes de Python que se instalan con `requirements.txt` son:
 ## Instalación paso a paso
  
 Hacé esto **una sola vez**.
+ 
+### Paso 0: Obtener el proyecto
+ 
+Elegí una de estas dos opciones:
+ 
+- **Descargar como ZIP (más fácil, no requiere Git):**
+  1. Entrá a [github.com/Kikinota27/ao3-book](https://github.com/Kikinota27/ao3-book).
+  2. Hacé clic en el botón verde **`<> Code`** y después en **"Download ZIP"**.
+  3. Descomprimí el archivo descargado en la carpeta que quieras (por ejemplo, `ao3-book`).
+- **Clonar con Git (si ya tenés Git instalado):** abrí una terminal donde quieras guardar el proyecto y ejecutá:
+```
+git clone https://github.com/Kikinota27/ao3-book.git
+```
  
 ### Paso 1: Instalar Python
  
