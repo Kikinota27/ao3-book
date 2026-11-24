@@ -29,6 +29,9 @@
  
   <header class="work-front">
     <h1 class="work-title">{{ work.title }}</h1>
+    {% if work.subtitle %}
+    <p class="work-subtitle">{{ work.subtitle }}</p>
+    {% endif %}
     {% if work.author %}
     <p class="work-author">{{ work.author }}</p>
     {% endif %}

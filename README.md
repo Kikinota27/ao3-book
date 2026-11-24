@@ -17,8 +17,8 @@ Ponés los archivos `.html` en una carpeta, ejecutás un comando y obtenés el P
   - Si la historia tiene **un solo capítulo**, no muestra el título de capítulo ni el índice.
 - Descarta lo que no sirve en papel: tags, estadísticas, notas del autor, notas finales y links.
 - Puede generar **un solo libro con todas las historias** (ordenadas alfabéticamente por título) o **un PDF por historia**.
-- Puede **dividir historias muy largas en varias partes** (*Part I*, *Part II*…) según un máximo de páginas, con tamaños parejos y sin cortar capítulos por la mitad.
-- Formatos de papel a elegir: **A4, A5, Carta y folleto** (explicado más abajo).
+- Puede **dividir historias largas en varias partes o tomos** (*Part I*, *Part II*…): de forma **automática** según un máximo de páginas (con tamaños parejos y sin cortar capítulos) o de forma **manual** eligiendo qué capítulos van en cada tomo.
+- Formatos de papel a elegir: **A4, A5, A6, Carta y folleto** (explicado más abajo).
 - Formato de libro: márgenes pensados para encuadernar (más espacio del lado del lomo), título de la historia arriba, número de página abajo, texto justificado con sangría y separador de escenas `* * *`.
 - Si un archivo está dañado o no es de AO3, avisa y sigue con los demás.
 ---
@@ -141,7 +141,7 @@ Agregando `--format` a cualquier comando de arriba, por ejemplo para probar el f
 venv\Scripts\python run.py --format booklet
 ```
  
-Las opciones son `a4`, `a5`, `letter` y `booklet`. También podés usar otro archivo de configuración con `--config otro.toml`.
+Las opciones son `a4`, `a5`, `a6`, `letter` y `booklet`. También podés usar otro archivo de configuración con `--config otro.toml`.
  
 ---
  
@@ -162,37 +162,85 @@ output_dir = "output"
  
 [book]
 format = "a5"
-combine = true
+combine = false
 start_on_recto = true
 toc_on_recto = false
 font_family = "Georgia, 'Times New Roman', serif"
 font_size = "11pt"
 line_height = 1.45
-split_long_works = false
-max_pages_per_part = 400
  
 [booklet]
 sheet = "a4"
+
+[split]
+split_long_works = false
+max_pages_per_part = 600
+enabled = false
+# volumes = ["1-3", "4-5", "6-8"]
+# names = ["Año 1", "Año 3", "Año 5"]
+renumber_chapters = false
 ```
  
 ### Todas las opciones
  
-| Opción | Valores | Qué hace |
-|--------|---------|----------|
-| `dir` | una carpeta | Carpeta donde están los `.html` (por defecto `input`) |
-| `output_dir` | una carpeta | Carpeta donde se guardan los PDF (por defecto `output`) |
-| `format` | `"a4"`, `"a5"`, `"letter"`, `"booklet"` | Tamaño del libro (ver tabla de formatos) |
-| `combine` | `true` / `false` | `true`: un solo libro con todas las historias. `false`: un PDF por historia |
-| `start_on_recto` | `true` / `false` | `true`: cada historia empieza en una página derecha (agrega páginas en blanco si hace falta). Solo tiene efecto si `combine = true` |
-| `toc_on_recto` | `true` / `false` | `true`: el índice empieza en una página derecha (agrega una página en blanco después de la portada si hace falta). `false`: va en la página inmediatamente siguiente |
-| `font_family` | nombre de fuente | Tipo de letra. Se puede poner una lista de respaldo, por ejemplo `"Garamond, Georgia, serif"`. Usa fuentes instaladas en tu computadora |
-| `font_size` | por ejemplo `"11pt"` | Tamaño de la letra. Probá `"10pt"` para ahorrar papel o `"13pt"` para letra grande |
-| `line_height` | por ejemplo `1.45` | Espacio entre renglones. Más alto = más aireado y más páginas |
-| `split_long_works` | `true` / `false` | `true`: divide automáticamente las historias que superen `max_pages_per_part` en varias partes (*Part I*, *Part II*…), con tamaños parejos y sin cortar capítulos. `false`: las deja completas |
-| `max_pages_per_part` | por ejemplo `400` | Cantidad máxima de páginas del PDF por parte cuando `split_long_works = true` (son páginas del libro, no hojas físicas) |
-| `sheet` | `"a4"` o `"letter"` | Solo para folleto: tamaño de la **hoja** que vas a poner en la impresora |
+| Sección | Opción | Valores | Qué hace |
+|---------|--------|---------|----------|
+| `[input]` | `dir` | una carpeta | Carpeta donde están los `.html` (por defecto `input`) |
+| `[input]` | `output_dir` | una carpeta | Carpeta donde se guardan los PDF (por defecto `output`) |
+| `[book]` | `format` | `"a4"`, `"a5"`, `"a6"`, `"letter"`, `"booklet"` | Tamaño del libro (ver tabla de formatos) |
+| `[book]` | `combine` | `true` / `false` | `true`: un solo libro con todas las historias. `false`: un PDF por historia |
+| `[book]` | `start_on_recto` | `true` / `false` | `true`: cada historia empieza en una página derecha (agrega páginas en blanco si hace falta). Solo tiene efecto si `combine = true` |
+| `[book]` | `toc_on_recto` | `true` / `false` | `true`: el índice empieza en una página derecha (agrega una página en blanco después de la portada si hace falta). `false`: va en la página inmediatamente siguiente |
+| `[book]` | `font_family` | nombre de fuente | Tipo de letra. Se puede poner una lista de respaldo, por ejemplo `"Garamond, Georgia, serif"`. Usa fuentes instaladas en tu computadora |
+| `[book]` | `font_size` | por ejemplo `"11pt"` | Tamaño base de la letra. **Escala todo el libro en proporción** (texto, títulos, subtítulo, autor, índice, citas, encabezado y número de página). Probá `"10pt"` para ahorrar papel o `"12pt"`–`"13pt"` para letra grande |
+| `[book]` | `line_height` | por ejemplo `1.45` | Espacio entre renglones. Más alto = más aireado y más páginas |
+| `[booklet]` | `sheet` | `"a4"`, `"a5"` o `"letter"` | Solo para folleto: tamaño de la **hoja** que vas a poner en la impresora |
+| `[split]` | `split_long_works` | `true` / `false` | `true`: divide automáticamente las historias que superen `max_pages_per_part` en varias partes (*Part I*, *Part II*…), con tamaños parejos y sin cortar capítulos. `false`: las deja completas |
+| `[split]` | `max_pages_per_part` | por ejemplo `600` | Cantidad máxima de páginas del PDF por parte cuando `split_long_works = true` (son páginas del libro, no hojas físicas) |
+| `[split]` | `enabled` | `true` / `false` | `true`: activa la **división manual en tomos** según `volumes` (requiere un solo archivo `.html` en `input`). Si además está activo `split_long_works`, gana la división manual |
+| `[split]` | `volumes` | lista de textos, p. ej. `["1-3", "4", "5-8"]` | Capítulos de cada tomo cuando `enabled = true`. Cada elemento es un rango (`"inicio-fin"`) o un capítulo suelto (`"4"`), usando la **posición** del capítulo en el archivo (desde `1`) |
+| `[split]` | `names` | *(opcional)* lista de textos | Un subtítulo por tomo (misma cantidad de elementos que `volumes`). Se muestra debajo del título en la portada y se agrega al nombre del PDF |
+| `[split]` | `renumber_chapters` | `true` / `false` | `false`: mantiene la numeración original de los capítulos. `true`: dentro de cada tomo o parte, los capítulos con título `Chapter N` o `Chapter N: Título` vuelven a empezar desde `Chapter 1` (otros títulos no se tocan). Aplica tanto a división manual como automática |
  
 Las carpetas se cuentan desde donde está `config.toml`.
+
+> **Nota sobre migración:** `split_long_works` y `max_pages_per_part` antes vivían en `[book]`. Si todavía los tenés ahí, el programa los sigue leyendo pero muestra un aviso para que los muevas a `[split]`. Si están en ambas secciones, gana `[split]`.
+
+### Dividir una historia en tomos (`[split]`)
+
+Además de la división automática por cantidad de páginas (`split_long_works = true`), podés dividir **una historia larga en tomos elegidos por vos** (por ejemplo, separando arcos o años).
+
+1. Dejá **un solo archivo `.html`** en la carpeta `input`.
+2. Configurá la sección `[split]` en `config.toml`:
+
+```toml
+[split]
+enabled = true
+volumes = ["1-3", "4", "5-8"]
+names = ["Año 1", "La tormenta", "Año 5"]
+renumber_chapters = true
+```
+
+Qué hace el programa con esa configuración:
+- Genera un PDF separado por cada tomo (si tenías `combine = true`, lo ignora con un aviso leve porque no es un error y continúa normalmente). Si usás `format = "booklet"`, cada tomo se arma como folleto aparte.
+- Cada tomo se titula `{Título} Part I`, `{Título} Part II`, etc., y conserva el autor y el resumen.
+- Si incluís `names`, cada nombre aparece como subtítulo en la portada y se suma al nombre del archivo (por ejemplo `mi-historia-part-i-ano-1.pdf`).
+- Incluso si un tomo tiene **un solo capítulo** (como `"4"` arriba), conserva su índice y el encabezado del capítulo.
+- Los números de `volumes` son la **posición del capítulo en el archivo** (`1` = primer capítulo), sin importar el número escrito en el título.
+
+#### Errores comunes en `[split]` y cómo corregirlos
+
+Cuando `enabled = true`, cualquier error en `[split]` detiene el programa antes de generar PDFs e indica exactamente qué corregir:
+
+| Error | Qué pasó | Cómo corregirlo |
+|-------|----------|-----------------|
+| `input.dir: se encontraron N archivos .html` / `ningún archivo .html` | Hay 0 o más de 1 archivo `.html` en la carpeta de entrada | Dejá un único `.html` en `input` (o poné `enabled = false`) |
+| `split.volumes: debe ser una lista de textos, no una sola cadena` | Escribiste `volumes = "1-3, 4-5"` en lugar de una lista | Usá corchetes y comillas por cada tomo: `volumes = ["1-3", "4-5"]` |
+| `formato inválido` / `el número de capítulo no puede ser 0` / `el rango está invertido` | Algún elemento tiene letras, un `0` o está al revés (ej. `"5-3"`) | Usá solo números positivos en formato `"N"` o `"N-M"` con `N <= M`, ej. `["1-3", "4", "5-8"]` |
+| `hay un salto` / `hay un solapamiento` / `no están en orden ascendente` / `debe empezar en el capítulo 1` | Faltan capítulos entre tomos, alguno se repite o los rangos están desordenados | Empezá en `1`, en orden ascendente y sin huecos ni repetidos: `["1-3", "4-5", "6-7"]` |
+| `split.names: tiene X elemento(s), pero split.volumes tiene Y` / `está vacío` | `names` no coincide en cantidad con `volumes` o tiene un texto vacío | Poné un texto no vacío por cada tomo, o comentá/borrá la línea `names` |
+| `el rango supera la cantidad de capítulos` / `cobertura incompleta` | La historia tiene menos o más capítulos de los que cubren los rangos | El mensaje muestra la cantidad real de capítulos; ajustá el último rango para que termine exactamente en ese número |
+| `la obra tiene un solo capítulo y no se puede dividir en tomos` | El archivo tiene un solo capítulo | Poné `enabled = false` en `[split]` para generarla completa |
  
 ### Formatos
  
@@ -200,23 +248,52 @@ Las carpetas se cuentan desde donde está `config.toml`.
 |----------|-------------------------------|----------------|
 | `"a4"` | 210 × 297 mm | Libro grande, hoja común |
 | `"a5"` | 148 × 210 mm | Libro de bolsillo (mitad de A4) |
+| `"a6"` | 105 × 148 mm | Libro de bolsillo chico (cuarto de A4 / mitad de A5), ideal para historias cortas |
 | `"letter"` | 8,5 × 11 pulgadas | Hoja carta |
-| `"booklet"` | La mitad de la hoja elegida en `sheet` | Imprimir en hojas sueltas y doblarlas para armar un librito (ver abajo) |
+| `"booklet"` | La mitad de la hoja elegida en `sheet` (`a4`, `a5` o `letter`) | Imprimir en hojas sueltas y doblarlas para armar un librito (ver abajo) |
+
+### Libros con pocas páginas
+
+Si una historia queda demasiado fina para encuadernar (por ejemplo, unas 40 páginas en A5), tenés tres formas simples de darle más cuerpo:
+
+- **Agrandar letra e interlineado en A5:** como `font_size` escala todo el libro en proporción (títulos, encabezado, pie y espaciados), el diseño sigue equilibrado:
+  ```toml
+  [book]
+  format = "a5"
+  font_size = "12pt"
+  line_height = 1.6
+  ```
+- **Pasar a formato A6 con la letra por defecto:** la página es más chica (105 × 148 mm) y los márgenes se achican en proporción, así que la misma historia ocupa bastante más páginas:
+  ```toml
+  [book]
+  format = "a6"
+  font_size = "11pt"
+  line_height = 1.45
+  ```
+- **Armar un folleto en hojas A5:** produce páginas tamaño A6 impuestas de a dos por cara sobre hojas A5 apaisadas:
+  ```toml
+  [book]
+  format = "booklet"
+
+  [booklet]
+  sheet = "a5"
+  ```
  
 ---
  
 ## Cómo imprimir
  
-**A4, A5 y Carta**
+**A4, A5, A6 y Carta**
 - Abrí el PDF, elegí imprimir y poné la escala en **"Tamaño real"** o **100 %** (no "Ajustar a la página").
-- Si elegís `a5`, lo ideal es imprimir en papel A5. Si no, tu impresora puede ofrecer "2 páginas por hoja", aunque conviene probar.
+- Si elegís `a5` o `a6`, lo ideal es imprimir en papel de ese tamaño (o cortar hojas A4 al medio para A5 / en cuatro para A6). Si no, tu impresora puede ofrecer varias páginas por hoja, aunque conviene probar.
 - Para ahorrar papel, imprimí a **doble cara**, volteando por el borde largo, como un libro.
 **Folleto (`booklet`)**
-1. En `config.toml` poné `format = "booklet"` y en `sheet` el tamaño de hoja que usás (`"a4"` o `"letter"`).
+1. En `config.toml` poné `format = "booklet"` y en `sheet` el tamaño de hoja que usás (`"a4"`, `"a5"` o `"letter"`).
 2. Ejecutá el programa. En la pantalla te dice cuántas hojas vas a usar.
 3. Imprimí el PDF en **tamaño real**, a **doble cara** y con la opción **"voltear por el borde corto"**.
 4. Juntá las hojas en el orden en que salieron, **doblalas por la mitad** y engrapá o cosé por el pliegue.
-La cantidad de páginas se completa sola con páginas en blanco al final, hasta ser múltiplo de 4. Los libros muy gruesos son difíciles de doblar en un solo cuadernillo: si te pasa, usá `combine = false` para hacer un librito por historia (y `split_long_works = true` si una sola historia sigue siendo demasiado larga).
+- **Si usás `sheet = "a5"`:** la hoja física de impresión es A5 (210 × 148 mm en apaisado). Si solo tenés hojas A4, podés cortarlas por la mitad antes de imprimir (una A4 cortada al medio da dos hojas A5 apaisadas) o imprimir a tamaño real sobre A4 y cortar después, según lo que acepte tu impresora.
+La cantidad de páginas se completa sola con páginas en blanco al final, hasta ser múltiplo de 4. Los libros muy gruesos son difíciles de doblar en un solo cuadernillo: si te pasa, usá `combine = false` para hacer un librito por historia (y en `[split]`, `split_long_works = true` o la división manual con `enabled = true` si una sola historia sigue siendo demasiado larga).
  
 ---
  
@@ -231,8 +308,8 @@ Revisá que la carpeta `input` exista y que adentro haya archivos `.html` descar
 **Un archivo aparece como `[aviso]` y no sale en el libro**
 No parece una descarga de AO3 en HTML (por ejemplo, está dañado o es otro formato). El resto del libro se genera igual.
  
-**"Error de configuración"**
-Hay un valor mal escrito en `config.toml`. El mensaje indica cuál y cuáles son las opciones válidas. Revisá las comillas y que `true`/`false` estén en minúsculas.
+**"Error de configuración" o mensajes `[error] split...`**
+Hay un valor mal escrito en `config.toml` o un problema en los rangos de `[split]`. El mensaje indica exactamente qué corregir y muestra un ejemplo válido. Revisá la tabla de errores comunes de `[split]` más arriba, las comillas y que `true`/`false` estén en minúsculas.
  
 **La letra no se ve como esperaba**
 La fuente que pusiste en `font_family` no está instalada en tu computadora, y el programa usa la siguiente de la lista. Probá con otra o instalá la fuente.

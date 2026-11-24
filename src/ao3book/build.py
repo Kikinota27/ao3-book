@@ -75,7 +75,8 @@ def _unique_names(works: list[Work]) -> list[str]:
     names: list[str] = []
     used: set[str] = set()
     for index, work in enumerate(works, start=1):
-        base = slugify(work.title) or (slugify(work.source.stem) if work.source else "") or f"obra-{index}"
+        raw_name = f"{work.title} - {work.subtitle}" if work.subtitle else work.title
+        base = slugify(raw_name) or (slugify(work.source.stem) if work.source else "") or f"obra-{index}"
         name, n = base, 2
         while name in used:
             name, n = f"{base}-{n}", n + 1

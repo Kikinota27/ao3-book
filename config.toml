@@ -6,15 +6,21 @@ dir = "input"            # carpeta con los .html de AO3
 output_dir = "output"    # carpeta donde se guardan los PDF
 
 [book]
-format = "a5"            # a4 | a5 | letter | booklet
-combine = false           # true: un solo PDF con todas las obras; false: un PDF por obra
+format = "a5"            # a4 | a5 | a6 | letter | booklet
+combine = false          # true: un solo PDF con todas las obras; false: un PDF por obra
 start_on_recto = true    # cada obra empieza en página derecha (agrega páginas en blanco si hace falta)
 toc_on_recto = false     # el índice empieza en página derecha (agrega página en blanco tras la portada si hace falta)
 font_family = "Georgia, 'Times New Roman', serif"
 font_size = "11pt"
 line_height = 1.45
-split_long_works = false      # dividir obras largas en partes (sin cortar capítulos)
-max_pages_per_part = 600     # páginas máximas por parte (páginas del PDF, no hojas)
 
 [booklet]
-sheet = "a4"             # hoja física para el folleto: a4 | letter (la página es la mitad de la hoja)
+sheet = "a4"             # hoja física para el folleto: a4 | a5 | letter (la página es la mitad de la hoja)
+
+[split]
+split_long_works = false          # división automática por páginas (sin cortar capítulos)
+max_pages_per_part = 600          # páginas máximas por parte (páginas del PDF, no hojas)
+enabled = false                   # división manual en tomos (requiere un único .html en la carpeta de entrada)
+# volumes = ["1-3", "4-5", "6-8"] # un string por tomo ("N" o "N-M", según posición del capítulo desde 1)
+# names = ["Año 1", "Año 3", "Año 5"] # opcional; subtítulo en portada y sufijo en el nombre del PDF
+renumber_chapters = false         # false: conserva numeración original; true: cada tomo/parte reinicia en Chapter 1

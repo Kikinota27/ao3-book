@@ -22,6 +22,7 @@ class Work:
     base_title: str = ""   # título original si es una parte
     part: int = 0          # 0 = obra completa; 1, 2... = número de parte
     is_part: bool = False
+    subtitle: str = ""     # subtítulo opcional del tomo (split.names)
 
     @property
     def sort_key(self) -> tuple[str, int]:

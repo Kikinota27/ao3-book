@@ -43,7 +43,7 @@ def _place(sheet: PageObject, page: PageObject, cell_x: float, cell_w: float, ce
 def impose_booklet(src: str | Path, dst: str | Path, sheet_size_mm: tuple[float, float]) -> Path:
     """Genera en `dst` la versión impuesta de `src`.
 
-    sheet_size_mm: hoja física apaisada (ancho, alto) en mm, p. ej. (297, 210).
+    sheet_size_mm: hoja física apaisada (ancho, alto) en mm.
     """
     reader = PdfReader(str(src))
     n = len(reader.pages)
