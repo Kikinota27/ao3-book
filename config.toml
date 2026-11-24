@@ -15,7 +15,10 @@ font_size = "11pt"
 line_height = 1.45
 
 [booklet]
-sheet = "a4"             # hoja física para el folleto: a4 | a5 | letter (la página es la mitad de la hoja)
+sheet = "a4"                  # hoja física para el folleto: a4 | a5 | letter (la página es la mitad de la hoja)
+signatures = false            # true: dividir el folleto en cuadernillos; false: un único cuadernillo
+sheets_per_signature = 30     # hojas físicas por cuadernillo (1 hoja doblada = 4 páginas del libro)
+balance = false               # false: cuadernillos llenos + último más chico; true: repartir hojas parejo (solo con signatures = true)
 
 [split]
 split_long_works = false          # división automática por páginas (sin cortar capítulos)

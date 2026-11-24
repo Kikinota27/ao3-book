@@ -171,6 +171,9 @@ line_height = 1.45
  
 [booklet]
 sheet = "a4"
+signatures = false
+sheets_per_signature = 50
+balance = false
 
 [split]
 split_long_works = false
@@ -195,6 +198,9 @@ renumber_chapters = false
 | `[book]` | `font_size` | por ejemplo `"11pt"` | Tamaño base de la letra. **Escala todo el libro en proporción** (texto, títulos, subtítulo, autor, índice, citas, encabezado y número de página). Probá `"10pt"` para ahorrar papel o `"12pt"`–`"13pt"` para letra grande |
 | `[book]` | `line_height` | por ejemplo `1.45` | Espacio entre renglones. Más alto = más aireado y más páginas |
 | `[booklet]` | `sheet` | `"a4"`, `"a5"` o `"letter"` | Solo para folleto: tamaño de la **hoja** que vas a poner en la impresora |
+| `[booklet]` | `signatures` | `true` / `false` | Solo para folleto: `true` divide el libro en varios **cuadernillos** más chicos dentro del mismo PDF; `false` arma todo en un único cuadernillo |
+| `[booklet]` | `sheets_per_signature` | entero ≥ 1 (por defecto `50`) | Cantidad máxima de **hojas físicas** por cuadernillo cuando `signatures = true` (1 hoja doblada = 4 páginas del libro; 50 hojas = 200 páginas) |
+| `[booklet]` | `balance` | `true` / `false` | Solo tiene efecto con `signatures = true`: `false` arma cuadernillos llenos y deja el resto en el último; `true` reparte las hojas lo más parejo posible entre los cuadernillos |
 | `[split]` | `split_long_works` | `true` / `false` | `true`: divide automáticamente las historias que superen `max_pages_per_part` en varias partes (*Part I*, *Part II*…), con tamaños parejos y sin cortar capítulos. `false`: las deja completas |
 | `[split]` | `max_pages_per_part` | por ejemplo `600` | Cantidad máxima de páginas del PDF por parte cuando `split_long_works = true` (son páginas del libro, no hojas físicas) |
 | `[split]` | `enabled` | `true` / `false` | `true`: activa la **división manual en tomos** según `volumes` (requiere un solo archivo `.html` en `input`). Si además está activo `split_long_works`, gana la división manual |
@@ -222,7 +228,7 @@ renumber_chapters = true
 ```
 
 Qué hace el programa con esa configuración:
-- Genera un PDF separado por cada tomo (si tenías `combine = true`, lo ignora con un aviso leve porque no es un error y continúa normalmente). Si usás `format = "booklet"`, cada tomo se arma como folleto aparte.
+- Genera un PDF separado por cada tomo (si tenías `combine = true`, lo ignora con un aviso leve porque no es un error y continúa normalmente). Si usás `format = "booklet"`, cada tomo se arma como folleto aparte (y si `signatures = true`, los cuadernillos se calculan por separado para cada tomo).
 - Cada tomo se titula `{Título} Part I`, `{Título} Part II`, etc., y conserva el autor y el resumen.
 - Si incluís `names`, cada nombre aparece como subtítulo en la portada y se suma al nombre del archivo (por ejemplo `mi-historia-part-i-ano-1.pdf`).
 - Incluso si un tomo tiene **un solo capítulo** (como `"4"` arriba), conserva su índice y el encabezado del capítulo.
@@ -293,7 +299,39 @@ Si una historia queda demasiado fina para encuadernar (por ejemplo, unas 40 pág
 3. Imprimí el PDF en **tamaño real**, a **doble cara** y con la opción **"voltear por el borde corto"**.
 4. Juntá las hojas en el orden en que salieron, **doblalas por la mitad** y engrapá o cosé por el pliegue.
 - **Si usás `sheet = "a5"`:** la hoja física de impresión es A5 (210 × 148 mm en apaisado). Si solo tenés hojas A4, podés cortarlas por la mitad antes de imprimir (una A4 cortada al medio da dos hojas A5 apaisadas) o imprimir a tamaño real sobre A4 y cortar después, según lo que acepte tu impresora.
-La cantidad de páginas se completa sola con páginas en blanco al final, hasta ser múltiplo de 4. Los libros muy gruesos son difíciles de doblar en un solo cuadernillo: si te pasa, usá `combine = false` para hacer un librito por historia (y en `[split]`, `split_long_works = true` o la división manual con `enabled = true` si una sola historia sigue siendo demasiado larga).
+La cantidad de páginas se completa sola con páginas en blanco al final, hasta ser múltiplo de 4.
+
+#### Libros gruesos: modo cuadernillos (`signatures`)
+
+Cuando un libro tiene muchas páginas, doblar todas las hojas juntas en un único cuadernillo resulta incómodo o imposible. La encuadernación tradicional resuelve esto dividiendo el libro en varios **cuadernillos**: pequeños grupos de hojas (por ejemplo, de 8 a 50 hojas físicas según el grosor del papel) que se doblan y cosen o pegan por separado, y después se unen en orden para formar el lomo completo.
+
+Para activarlo, agregá estas opciones en `[booklet]` dentro de `config.toml`:
+
+```toml
+[book]
+format = "booklet"
+
+[booklet]
+sheet = "a4"
+signatures = true
+sheets_per_signature = 50     # hojas físicas por cuadernillo (1 hoja doblada = 4 páginas)
+balance = false               # false: llenos + resto al final; true: repartir parejo
+```
+
+- **Unidad:** `sheets_per_signature` se mide en **hojas físicas** (las que salen de la impresora). Cada hoja doblada al medio tiene **4 páginas del libro** (2 por cara), así que 50 hojas equivalen a 200 páginas del libro (100 caras en el PDF).
+- **`balance = false` (por defecto):** arma cuadernillos completos de `sheets_per_signature` hojas y pone lo que sobra en el último. Por ejemplo, un libro de 230 páginas con 50 hojas por cuadernillo sale en **2 cuadernillos: 50 + 8 hojas** (las páginas en blanco de relleno quedan siempre al final del libro).
+- **`balance = true`:** reparte las hojas totales lo más parejo posible entre la misma cantidad de cuadernillos (sin superar `sheets_per_signature` y con una diferencia máxima de 1 hoja entre ellos). Con el mismo ejemplo de 230 páginas y límite 50, salen **2 cuadernillos de 29 + 29 hojas**.
+- **Con tomos o varias historias:** los cuadernillos se calculan por cada PDF generado (si dividís una historia con `[split]`, cada tomo tiene sus propios cuadernillos; si `combine = true`, se calculan sobre el libro combinado completo). Si el libro entra en un solo cuadernillo, el resultado es igual al modo folleto normal.
+- Si dejás `signatures = true` pero elegís un `format` distinto de `"booklet"`, no da error: muestra un aviso y sigue normalmente con el formato elegido.
+
+**Cómo imprimir y armar con cuadernillos:**
+1. Ejecutá el programa. Todo sale en **un único PDF**, con los cuadernillos uno detrás del otro, y en la consola te indica cuántas hojas lleva cada cuadernillo y dónde separar el montón.
+2. Imprimí el PDF completo en **tamaño real**, a **doble cara** y con **"voltear por el borde corto"**.
+3. Sin desordenar las hojas que salieron de la impresora, **separá el montón** según la cantidad de hojas que te indicó el programa (por ejemplo cada 50 hojas, o en los grupos exactos si usaste `balance = true`).
+4. **Doblá cada grupo por la mitad** y **cosé o pegá cada cuadernillo por su pliegue**.
+5. **Uní los cuadernillos en orden** (primero el 1, luego el 2, etc.) para armar el libro final.
+
+Si además preferís dividir una historia muy larga en varios libros físicos independientes (cada uno con su portada e índice), podés combinar esto con `combine = false` o con la sección `[split]` (`split_long_works = true` o `enabled = true`).
  
 ---
  

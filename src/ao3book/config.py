@@ -10,6 +10,7 @@ from pathlib import Path
 BOOKLET_FORMAT = "booklet"
 DEFAULT_FORMAT = "a5"
 DEFAULT_BOOKLET_SHEET = "a4"
+DEFAULT_SHEETS_PER_SIGNATURE = 50
 _MARGIN_REF_SIZE = "a5"
 
 _MARGINS_A5: dict[str, float] = {"top": 16.0, "bottom": 18.0, "inner": 20.0, "outer": 14.0}
@@ -86,6 +87,9 @@ class Config:
     font_size: str = "11pt"
     line_height: float = 1.45
     booklet_sheet: str = DEFAULT_BOOKLET_SHEET
+    booklet_signatures: bool = False
+    booklet_sheets_per_signature: int = DEFAULT_SHEETS_PER_SIGNATURE
+    booklet_balance: bool = False
     split_long_works: bool = False
     max_pages_per_part: int = 400
     split_enabled: bool = False
@@ -149,6 +153,15 @@ def _validate(cfg: Config) -> Config:
         raise ConfigError(f"format '{cfg.format}' inválido. Opciones: {', '.join(FORMATS)}")
     if cfg.booklet_sheet not in SHEETS:
         raise ConfigError(f"booklet.sheet '{cfg.booklet_sheet}' inválido. Opciones: {', '.join(SHEETS)}")
+    if (
+        isinstance(cfg.booklet_sheets_per_signature, bool)
+        or not isinstance(cfg.booklet_sheets_per_signature, int)
+        or cfg.booklet_sheets_per_signature < 1
+    ):
+        raise ConfigError(
+            f"booklet.sheets_per_signature '{cfg.booklet_sheets_per_signature}' inválido. "
+            "Debe ser un número entero mayor o igual que 1 (hojas físicas por cuadernillo)"
+        )
     if cfg.line_height <= 0:
         raise ConfigError("line_height debe ser mayor que 0")
     if cfg.max_pages_per_part < 1:
@@ -191,6 +204,8 @@ def load_config(path: str | Path = "config.toml") -> Config:
     inp = data.get("input", {})
     book = data.get("book", {})
     booklet = data.get("booklet", {})
+    if not isinstance(booklet, dict):
+        raise ConfigError("la sección [booklet] debe ser una tabla TOML")
     split = data.get("split", {})
     if not isinstance(split, dict):
         raise ConfigError("la sección [split] debe ser una tabla TOML")
@@ -219,6 +234,11 @@ def load_config(path: str | Path = "config.toml") -> Config:
         font_size=book.get("font_size", defaults.font_size),
         line_height=float(book.get("line_height", defaults.line_height)),
         booklet_sheet=str(booklet.get("sheet", defaults.booklet_sheet)).lower(),
+        booklet_signatures=bool(booklet.get("signatures", defaults.booklet_signatures)),
+        booklet_sheets_per_signature=booklet.get(
+            "sheets_per_signature", defaults.booklet_sheets_per_signature
+        ),
+        booklet_balance=bool(booklet.get("balance", defaults.booklet_balance)),
         split_long_works=split_long_works,
         max_pages_per_part=max_pages_per_part,
         split_enabled=bool(split.get("enabled", defaults.split_enabled)),

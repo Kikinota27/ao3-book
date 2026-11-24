@@ -15,7 +15,7 @@ from typing import Callable
 
 from pypdf import PdfReader
 
-from .booklet import impose_booklet
+from .booklet import format_signatures_message, impose_booklet, signature_sheets
 from .build import build_documents
 from .config import FORMATS, Config, ConfigError, load_config
 from .parser import list_html_files, parse_dir
@@ -66,6 +66,12 @@ def run(config: Config, render: Callable[..., object] = render_pdf) -> int:
         print(f"No se encontraron obras válidas (.html) en {config.input_dir}", file=sys.stderr)
         return 1
 
+    if config.booklet_signatures and not config.is_booklet:
+        print(
+            '[aviso] las opciones de cuadernillos solo aplican con format = "booklet"; se ignoran.',
+            file=sys.stderr,
+        )
+
     print(f"Procesando {len(files)} archivo(s) de entrada en {config.input_dir}...", flush=True)
 
     works = parse_dir(config.input_dir)
@@ -108,14 +114,27 @@ def run(config: Config, render: Callable[..., object] = render_pdf) -> int:
     for doc in documents:
         out = config.output_dir / f"{doc.name}.pdf"
         out.parent.mkdir(parents=True, exist_ok=True)
+        detail: str | None = None
         try:
             if config.is_booklet:
                 with tempfile.TemporaryDirectory() as tmp:
                     plain = Path(tmp) / f"{doc.name}.pdf"
                     render(doc.html, plain)
                     pages = _page_count(plain)
-                    impose_booklet(plain, out, config.sheet_size_mm)
-                info = f"{pages} páginas -> {_page_count(out) // 2} hojas a doble cara"
+                    impose_booklet(
+                        plain,
+                        out,
+                        config.sheet_size_mm,
+                        signatures=config.booklet_signatures,
+                        sheets_per_signature=config.booklet_sheets_per_signature,
+                        balance=config.booklet_balance,
+                    )
+                per_sig = config.booklet_sheets_per_signature if config.booklet_signatures else None
+                sig_sheets = signature_sheets(pages, per_sig, balance=config.booklet_balance)
+                if len(sig_sheets) > 1:
+                    detail = format_signatures_message(pages, sig_sheets, balance=config.booklet_balance)
+                else:
+                    info = f"{pages} páginas -> {_page_count(out) // 2} hojas a doble cara"
             else:
                 render(doc.html, out)
                 info = f"{_page_count(out)} páginas"
@@ -126,7 +145,11 @@ def run(config: Config, render: Callable[..., object] = render_pdf) -> int:
             failures += 1
             print(f"[error] {doc.name}: {error}", file=sys.stderr)
             continue
-        print(f"  {out}  ({info})", flush=True)
+        if detail:
+            print(f"  {out}", flush=True)
+            print(f"    {detail}", flush=True)
+        else:
+            print(f"  {out}  ({info})", flush=True)
 
     return 1 if failures else 0
 
